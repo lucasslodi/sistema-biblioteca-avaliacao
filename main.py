@@ -4,35 +4,23 @@ import os
 ARQUIVO_CSV = "livros.csv"
 CAMPOS_CSV = ["titulo", "autor", "ano", "isbn", "status"]
 
-
-# Criação da biblioteca de livros
-# ==========================================
-
 def importar_livros(nome_arquivo): 
-    biblioteca = [] #cria uma lista vazia 
-
-    with open(nome_arquivo, mode='r', encoding='utf-8') as arquivo: #abre a lista no modo leitor. o encoding serve para ler as palavras do português de forma correta 
+    biblioteca = [] #cria lista vazia 
+    if not os.path.exists(nome_arquivo): 
+        return biblioteca
+    with open(nome_arquivo, mode='r', encoding='utf-8') as arquivo: 
         leitor = csv.DictReader(arquivo) 
-        for linha in leitor:
+        for linha in leitor: 
             biblioteca.append(linha) 
-            
     return biblioteca
 
-
 def salvar_livros(nome_arquivo, biblioteca):
-   
-    with open(nome_arquivo, mode='w', newline='', encoding='utf-8') as arquivo: #abre o arquivo csv no mode de escritor e reescreve as linhas do arquivo (para salvar os livros novos)
+    with open(nome_arquivo, mode='w', newline='', encoding='utf-8') as arquivo: 
         escritor = csv.DictWriter(arquivo, fieldnames=CAMPOS_CSV)
-        escritor.writeheader() # Escreve o cabeçalho (titulo, autor, ano, isbn, status)
-        escritor.writerows(biblioteca) # Escreve todos os livros cadastrados de uma só vez
-
-
-# 
-# REQUISITOS DE NEGÓCIO (FUNÇÕES DO SISTEMA)
-# ==========================================
+        escritor.writeheader()
+        escritor.writerows(biblioteca)
 
 def cadastrar_livro(biblioteca):
-
     print("\n--- CADASTRO DE NOVO LIVRO ---") 
     titulo = input("Título: ")
     autor = input("Autor: ")
@@ -44,30 +32,39 @@ def cadastrar_livro(biblioteca):
         "autor": autor,
         "ano": ano,
         "isbn": isbn,
-        "status": "disponível" # Todo livro inicia obrigatoriamente disponível
+        "status": "disponível"
     }
 
     biblioteca.append(novo_livro)
     print(f"\nLivro '{titulo}' cadastrado com sucesso!")
 
-
 def listar_livros(biblioteca):
-    """Exibe no terminal a listagem completa de livros."""
     print("\n--- CATÁLOGO DE LIVROS ---")
-    
     if not biblioteca:
         print("Nenhum livro cadastrado no momento.")
-        return # Encerra a execução da função aqui caso a biblioteca esteja vazia.
+        return 
 
     for i, livro in enumerate(biblioteca, start=1):
         print(f"{i}. [{livro['status'].upper()}] {livro['titulo']} - {livro['autor']} ({livro['ano']}) | ISBN: {livro['isbn']}")
 
+def alterar_status(biblioteca, novo_status):
+    acao = "empréstimo" if novo_status == "emprestado" else "devolução"
+    print(f"\n--- REGISTRAR {acao.upper()} ---")
+    isbn = input("Digite o ISBN do livro: ")
 
-#INTERFACE 
-# ==========================================
+    for livro in biblioteca:
+        if livro['isbn'] == isbn:
+            if livro['status'] == novo_status:
+                print(f"Aviso: O livro já está com o status '{novo_status}'.")
+                return
+
+            livro['status'] = novo_status
+            print(f"Sucesso! {acao.capitalize()} registrado para o livro '{livro['titulo']}'.")
+            return
+
+    print("Erro: Nenhum livro encontrado com o ISBN informado.")
 
 def exibir_menu():
-    """Exibe o menu de opções no console."""
     print("\n=================================")
     print("\n Programa feito por Lucas Emanuel")
     print("\n=================================")
@@ -82,15 +79,18 @@ def exibir_menu():
     print("0. Sair do programa")
     return input("Escolha uma opção: ")
 
-
 def main():
     biblioteca = importar_livros(ARQUIVO_CSV)
-    
-    while True:  # mantém o programa rodando até o usuário escolher a opção 0 (Sair).
+
+    while True: 
         opcao = exibir_menu()
-        
+
         if opcao == '1':
             cadastrar_livro(biblioteca)
+        elif opcao == '2':
+            alterar_status(biblioteca, "emprestado")
+        elif opcao == '3':
+            alterar_status(biblioteca, "disponível")
         elif opcao == '4':
             listar_livros(biblioteca)
         elif opcao == '0':
@@ -102,5 +102,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+    
     
