@@ -5,7 +5,7 @@ ARQUIVO_CSV = "livros.csv"
 CAMPOS_CSV = ["titulo", "autor", "ano", "isbn", "status"]
 
 def importar_livros(nome_arquivo): 
-    biblioteca = [] #cria lista vazia 
+    biblioteca = [] #cria lista vazia
     if not os.path.exists(nome_arquivo): 
         return biblioteca
     with open(nome_arquivo, mode='r', encoding='utf-8') as arquivo: 
@@ -47,6 +47,21 @@ def listar_livros(biblioteca):
     for i, livro in enumerate(biblioteca, start=1):
         print(f"{i}. [{livro['status'].upper()}] {livro['titulo']} - {livro['autor']} ({livro['ano']}) | ISBN: {livro['isbn']}")
 
+def buscar_livros(biblioteca):
+    print("\n--- BUSCAR LIVRO ---")
+    termo = input("Digite o título ou autor para buscar: ").lower()
+
+    encontrados = []
+    for livro in biblioteca:
+        if termo in livro['titulo'].lower() or termo in livro['autor'].lower():
+            encontrados.append(livro)
+
+    if encontrados:
+        print(f"\nResultados encontrados ({len(encontrados)}):")
+        listar_livros(encontrados)
+    else:
+        print("\nNenhum livro encontrado com o termo informado.")
+
 def alterar_status(biblioteca, novo_status):
     acao = "empréstimo" if novo_status == "emprestado" else "devolução"
     print(f"\n--- REGISTRAR {acao.upper()} ---")
@@ -63,6 +78,34 @@ def alterar_status(biblioteca, novo_status):
             return
 
     print("Erro: Nenhum livro encontrado com o ISBN informado.")
+
+def pegar_titulo(livro):
+    return livro['titulo'].lower()
+
+def pegar_autor(livro):
+    return livro['autor'].lower()
+
+def pegar_ano(livro):
+    return livro['ano']
+
+def ordenar_livros(biblioteca):
+    print("\n--- ORDENAR LIVROS ---")
+    print("1. Por Título")
+    print("2. Por Autor")
+    print("3. Por Ano de Publicação")
+    opcao = input("Opção de ordenação: ")
+
+    if opcao == '1':
+        biblioteca.sort(key=pegar_titulo)
+        print("Livros ordenados por TÍTULO!")
+    elif opcao == '2':
+        biblioteca.sort(key=pegar_autor)
+        print("Livros ordenados por AUTOR!")
+    elif opcao == '3':
+        biblioteca.sort(key=pegar_ano)
+        print("Livros ordenados por ANO!")
+    else:
+        print("Opção inválida de ordenação.")
 
 def exibir_menu():
     print("\n=================================")
@@ -93,6 +136,10 @@ def main():
             alterar_status(biblioteca, "disponível")
         elif opcao == '4':
             listar_livros(biblioteca)
+        elif opcao == '5':
+            buscar_livros(biblioteca)
+        elif opcao == '6':
+            ordenar_livros(biblioteca)
         elif opcao == '0':
             salvar_livros(ARQUIVO_CSV, biblioteca)
             print("\nDados salvos em 'livros.csv'. Encerrando o sistema. Até logo!")
@@ -102,5 +149,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    
